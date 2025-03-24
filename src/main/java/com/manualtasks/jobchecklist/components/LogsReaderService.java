@@ -31,35 +31,42 @@ public class LogsReaderService {
 
 	private TimeZone easternTimeZone = TimeZone.getTimeZone("America/New_York");
 
-	private SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyyMMdd");
-
-	private SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
 	private static Logger logger = LoggerFactory.getLogger(LogsReaderService.class);
 
 	private Date dateNTime = new Date();
 
 	@Autowired
-	private TimingsValidatorService validatorService;
+	private InputDataValidatorService validatorService;
 
 	public ArrayList<String> findLogOccuringDatesByShift(String shift) throws ParseException {
 
+		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyyMMdd");
 		dateFormatter1.setTimeZone(easternTimeZone);
 
-		String timeStampTdy, timeStampYest;
+		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd");
+		dateFormatter2.setTimeZone(easternTimeZone);
+
+		String timeStampTdy_1, timeStampYest_1;
+		String timeStampTdy_2, timeStampYest_2;
 
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTimeZone(easternTimeZone);
 		calendar.add(Calendar.DATE, -1);
 
 		ArrayList<String> logDates = new ArrayList<>();
-		timeStampTdy = dateFormatter1.format(dateNTime);
-		timeStampYest = dateFormatter1.format(calendar.getTime());
+		timeStampTdy_1 = dateFormatter1.format(dateNTime);
+		timeStampTdy_2 = dateFormatter2.format(dateNTime);
+		timeStampYest_1 = dateFormatter1.format(calendar.getTime());
+		timeStampYest_2 = dateFormatter1.format(calendar.getTime());
+
 		if (shift.equalsIgnoreCase("s1")) {
-			logDates.add(timeStampYest);
-			logDates.add(timeStampTdy);
+			logDates.add(timeStampYest_1);
+			logDates.add(timeStampTdy_1);
+			logDates.add(timeStampTdy_2);
+			logDates.add(timeStampYest_2);
 		} else {
-			logDates.add(timeStampTdy);
+			logDates.add(timeStampTdy_1);
+			logDates.add(timeStampTdy_2);
 		}
 		return logDates;
 	}
@@ -67,22 +74,48 @@ public class LogsReaderService {
 	public ArrayList<String> findLogOccuringDatesByShift(String shift, String shiftStartTime, String shiftEndTime)
 			throws ParseException {
 
+		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyyMMdd");
 		dateFormatter1.setTimeZone(easternTimeZone);
 
+		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		dateFormatter2.setTimeZone(easternTimeZone);
 
-		String timeStampTdy, timeStampYest;
+		String timeStampTdy_1, timeStampYest_1;
 
 //		System.out.println(shiftStartTime + " - " + shiftEndTime);
 
 		ArrayList<String> logDates = new ArrayList<>();
-		timeStampTdy = dateFormatter1.format(dateFormatter2.parse(shiftEndTime));
-		timeStampYest = dateFormatter1.format(dateFormatter2.parse(shiftStartTime));
+		timeStampTdy_1 = dateFormatter1.format(dateFormatter2.parse(shiftEndTime));
+		timeStampYest_1 = dateFormatter1.format(dateFormatter2.parse(shiftStartTime));
 		if (shift.equalsIgnoreCase("s1")) {
-			logDates.add(timeStampYest);
-			logDates.add(timeStampTdy);
+			logDates.add(timeStampYest_1);
+			logDates.add(timeStampTdy_1);
 		} else {
-			logDates.add(timeStampTdy);
+			logDates.add(timeStampTdy_1);
+		}
+		return logDates;
+
+	}
+
+	public ArrayList<String> findLogOccuringDatesByShift2(String startTime, String endTime) throws ParseException {
+
+		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		dateFormatter2.setTimeZone(easternTimeZone);
+
+		SimpleDateFormat dateFormatter3 = new SimpleDateFormat("yyyy-MM-dd");
+		dateFormatter3.setTimeZone(easternTimeZone);
+
+		String timeStampTdy_1, timeStampYest_1;
+
+		ArrayList<String> logDates = new ArrayList<>();
+		timeStampTdy_1 = dateFormatter3.format(dateFormatter2.parse(endTime));
+		timeStampYest_1 = dateFormatter3.format(dateFormatter2.parse(startTime));
+
+		if (!timeStampTdy_1.equals(timeStampYest_1)) {
+			logDates.add(timeStampYest_1);
+			logDates.add(timeStampTdy_1);
+		} else {
+			logDates.add(timeStampTdy_1);
 		}
 		return logDates;
 
@@ -104,11 +137,15 @@ public class LogsReaderService {
 				ArrayList<String> errorList = null;
 				logNameWithTimeStamp = log.toString().substring(logNameStartIndexNum);
 				if (logNameWithTimeStamp.contains(listOfDatesForLogsCheck.get(x).toString())) {
+//					timeStamp = logNameWithTimeStamp.substring(
+//							logNameWithTimeStamp.indexOf(shiftStartTime.substring(0, 4)),
+//							logNameWithTimeStamp.indexOf("."));
+//					--> Changing the time stamp calculation in the substring for further precision
 					timeStamp = logNameWithTimeStamp.substring(
-							logNameWithTimeStamp.indexOf(shiftStartTime.substring(0, 4)),
+							logNameWithTimeStamp.indexOf(listOfDatesForLogsCheck.get(x).toString()),
 							logNameWithTimeStamp.indexOf("."));
-//					logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
-//							log.toString().substring(logNameStartIndexNum));
+					logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
+							log.toString().substring(logNameStartIndexNum));
 					if (validatorService.isLogCretdInGivnShift(timeStamp, shiftStartTime, shiftEndTime,
 							logNameWithTimeStamp)) {
 						logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
@@ -124,7 +161,7 @@ public class LogsReaderService {
 						errorLogFile.write("-->" + logNameWithTimeStamp + "\n");
 						boolean isErrExist = false;
 						String line;
-						String errorLine = "";
+						String errorLine = "", errorTimestamp = "";
 						String jobName = "";
 						if (JOB_NAME_AND_LOG_NAME_MAP.containsKey(logName))
 							jobName = JOB_NAME_AND_LOG_NAME_MAP.get(logName);
@@ -136,7 +173,7 @@ public class LogsReaderService {
 
 						while ((line = br.readLine()) != null) {
 							if (line.contains("ERROR")) {
-								// if condition to limit total characters to 300 per line of error for CP Letter
+								// condition to limit total characters to 300 per line of error for CP Letter
 								// job
 								if (jobName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
 									maxLen = 196;
@@ -144,9 +181,19 @@ public class LogsReaderService {
 									maxLen = 300;
 								else
 									maxLen = line.length();
-								errorLine = line.substring(line.indexOf("ERROR"), maxLen);
+								if (line.contains("ERROR")) {
+									errorLine = line.substring(line.indexOf("ERROR"), maxLen);
+								} else if (line.contains("Exception") || line.contains("exception")
+										|| line.contains("Error") || line.contains("error")) {
+									errorLine = line.substring(maxLen);
+								}
+//								errorLine = line.substring(0, maxLen);
+								errorTimestamp = line.substring(0, 19);
 								if (!errorList.contains(errorLine)) {
 									errorList.add(errorLine);
+									if (errorLine.contains("ERROR"))
+										addTimeStamp(errorList, errorLine, errorTimestamp);
+									logger.info(errorLine);
 									listOfErrorsOfLogs.put(jobName, errorList);
 								}
 								errorLogFile.write(errorLine + "\n");
@@ -156,6 +203,9 @@ public class LogsReaderService {
 								errorLine = "Job has been failed with deadlock\n";
 								if (!errorList.contains(errorLine)) {
 									errorList.add(errorLine);
+									if (errorLine.contains("ERROR"))
+										addTimeStamp(errorList, errorLine, errorTimestamp);
+									logger.info(errorLine);
 									listOfErrorsOfLogs.put(jobName, errorList);
 								}
 								errorLogFile.write(errorLine + "\n");
@@ -168,6 +218,24 @@ public class LogsReaderService {
 						errorLogFile.write("\n");
 						stream.close();
 					}
+				}
+			}
+		}
+	}
+
+	private void addTimeStamp(ArrayList<String> errorList, String errorLine, String errorTimestamp) {
+		logger.info("Came inside the timestamp method");
+//		for (String line : errorList) {
+		for (int i = 0; i < errorList.size(); i++) {
+			if (errorList.get(i).contains(errorLine)) {
+				if (errorList.get(i).contains("[[") && errorList.get(i).contains("]]")) {
+					logger.info("Already has brackets");
+					errorList.set(i, errorList.get(i).replace("]]", ", " + errorTimestamp + "]]"));
+//					line.replace("]]", ", " + errorTimestamp + "]]");
+				} else {
+					logger.info("Adding new brackets");
+					errorList.set(i, errorList.get(i).concat("[[" + errorTimestamp + "]]"));
+//					line.concat("[[" + errorTimestamp + "]]");
 				}
 			}
 		}

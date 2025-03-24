@@ -65,6 +65,11 @@ public class FileClosureValidator {
 
 	}
 
+	public void wait100ms() {
+		WaitingThread2 waitingThread2 = new WaitingThread2();
+		waitingThread2.start();
+	}
+
 }
 
 class WaitingThread extends Thread {
@@ -72,6 +77,17 @@ class WaitingThread extends Thread {
 	public void run() {
 		try {
 			Thread.sleep(7000);
+		} catch (InterruptedException e) {
+			e.getMessage();
+		}
+	}
+}
+
+class WaitingThread2 extends Thread {
+	@Override
+	public void run() {
+		try {
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.getMessage();
 		}

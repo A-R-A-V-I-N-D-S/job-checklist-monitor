@@ -15,28 +15,25 @@ import com.manualtasks.jobchecklist.model.ChecklistTemplateData;
 @Component
 public class JobLogsEntryService {
 
-	public void fillJobErrorsAndValidationStatus(Map<String, ArrayList<String>> listOfErrorsOfLogs,
+	public void fillJobErrorsAndValidationStatus(Map<String, ArrayList<String>> jobsAndErrorsPair,
 			List<ChecklistTemplateData> jobChecklistDataList, String shift) {
 		for (int i = 0; i < jobChecklistDataList.size(); i++) {
 			String jobName = jobChecklistDataList.get(i).getJobName();
-			if (listOfErrorsOfLogs.containsKey(jobName)
-					&& !(jobChecklistDataList.get(i).getJobStatus().equals(STATUS_YET_TO_START))
-					&& !(jobChecklistDataList.get(i).getJobStatus().equals(STATUS_NA))) {
+			if (jobsAndErrorsPair.containsKey(jobName)
+					&& !(jobChecklistDataList.get(i).getJobStatus().equalsIgnoreCase(STATUS_YET_TO_START))
+					&& !(jobChecklistDataList.get(i).getJobStatus().equalsIgnoreCase(STATUS_NA))) {
+
+				// If condition to check if already a value is present like previous shift
+				// details
 				if (jobChecklistDataList.get(i).getErrorDetails().length() > 2) {
 					jobChecklistDataList.get(i).setErrorDetails(jobChecklistDataList.get(i).getErrorDetails() + "\n"
-							+ shift.toUpperCase() + ":\n" + (listOfErrorsOfLogs.get(jobName).size() == 0 ? "No Errors"
-									: StringUtils.collectionToDelimitedString(listOfErrorsOfLogs.get(jobName), "\n")));
+							+ shift.toUpperCase() + ":\n" + (jobsAndErrorsPair.get(jobName).size() == 0 ? "No Errors"
+									: StringUtils.collectionToDelimitedString(jobsAndErrorsPair.get(jobName), "\n")));
 					jobChecklistDataList.get(i).setIsLogsValidated("Y");
 				} else {
 					jobChecklistDataList.get(i).setErrorDetails(jobChecklistDataList.get(i).getErrorDetails()
-							+ shift.toUpperCase() + ":\n" + (listOfErrorsOfLogs.get(jobName).size() == 0 ? "No Errors"
-									: StringUtils.collectionToDelimitedString(listOfErrorsOfLogs.get(jobName), "\n")));
-					jobChecklistDataList.get(i).setIsLogsValidated("Y");
-				}
-				if (jobChecklistDataList.get(i).getErrorDetails().contains("deadlock")) {
-					jobChecklistDataList.get(i).setErrorDetails(jobChecklistDataList.get(i).getErrorDetails() + "\n"
-							+ shift.toUpperCase() + ":\n" + (listOfErrorsOfLogs.get(jobName).size() == 0 ? "No Errors"
-									: StringUtils.collectionToDelimitedString(listOfErrorsOfLogs.get(jobName), "\n")));
+							+ shift.toUpperCase() + ":\n" + (jobsAndErrorsPair.get(jobName).size() == 0 ? "No Errors"
+									: StringUtils.collectionToDelimitedString(jobsAndErrorsPair.get(jobName), "\n")));
 					jobChecklistDataList.get(i).setIsLogsValidated("Y");
 				}
 			}

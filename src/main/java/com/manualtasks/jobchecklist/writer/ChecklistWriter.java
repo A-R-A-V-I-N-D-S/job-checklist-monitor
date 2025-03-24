@@ -4,6 +4,8 @@ import static com.manualtasks.jobchecklist.utils.ClassDataUtils.*;
 
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -23,11 +25,13 @@ public class ChecklistWriter {
 		// Writing rows data
 		for (int i = 0; i < templateDataList.size(); i++) {
 			XSSFRow row = sheet.createRow(i);
+//			System.out.print(i+", ");
 			for (int j = 0; j < TOTAL_COL_IN_CHECKLIST_SHEET; j++) {
 				switch (j) {
 				case 0:
 					XSSFCell serialNoCell = row.createCell(j);
 					// Only for the first column in Header row
+//					System.out.println(" - "+"\""+templateDataList.get(i).getSerialNo()+"\"");
 					if (i == 0) {
 						serialNoCell.setCellValue(templateDataList.get(i).getSerialNo());
 					} else {
@@ -88,6 +92,14 @@ public class ChecklistWriter {
 					break;
 				case 18:
 					row.createCell(j).setCellValue(templateDataList.get(i).getRemarks());
+					break;
+				case 19:
+					XSSFCell processingDateCell = row.createCell(j);
+					DataFormat fmt = sheet.getWorkbook().createDataFormat();
+					CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
+					cellStyle.setDataFormat(fmt.getFormat("@"));
+					processingDateCell.setCellStyle(cellStyle);
+					processingDateCell.setCellValue(templateDataList.get(i).getProcessingDate());
 					break;
 				default:
 					break;

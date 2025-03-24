@@ -3,7 +3,8 @@ package com.manualtasks.jobchecklist.controller;
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.CHECKLIST_SHEET_NAME;
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.CTM_DETAILS_SHEET_NAME;
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.BATCH_SERVERS_LIST;
-import static com.manualtasks.jobchecklist.utils.ClassDataUtils.JOB_NAME_AND_LOG_NAME_MAP;
+import static com.manualtasks.jobchecklist.utils.ClassDataUtils.ORDER_DATE_FORMAT;
+import static com.manualtasks.jobchecklist.utils.ClassDataUtils.SHIFT_TIME_FORMAT;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,20 +20,21 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StopWatch;
-
 import com.manualtasks.jobchecklist.components.FileClosureValidator;
 import com.manualtasks.jobchecklist.components.JSchSpringBatchLogsValidatingService;
 import com.manualtasks.jobchecklist.components.JobLogsEntryService;
 import com.manualtasks.jobchecklist.components.JobTimingsEntryService;
+import com.manualtasks.jobchecklist.components.InputDataValidatorService;
 import com.manualtasks.jobchecklist.model.ChecklistTemplateData;
-import com.manualtasks.jobchecklist.model.JFrameWindowUI;
 import com.manualtasks.jobchecklist.model.JobDetailsData;
 import com.manualtasks.jobchecklist.reader.ChecklistTemplateReader;
 import com.manualtasks.jobchecklist.reader.JobDetailsReader;
+import com.manualtasks.jobchecklist.ui.JframeInputUI;
 import com.manualtasks.jobchecklist.utils.ExcelDesign;
 import com.manualtasks.jobchecklist.writer.ChecklistWriter;
 
@@ -53,16 +55,23 @@ public class ApplicationController {
 
 	private JobLogsEntryService jobLogsEntryService;
 
-	private JFrameWindowUI jFrameWindowUI;
+	private InputDataValidatorService inputDataValidatorService;
+
+	private Logger logger = LoggerFactory.getLogger(ApplicationController.class);
+
+	@SuppressWarnings("unused")
+	private JframeInputUI jFrameWindowUI;
 
 	@Autowired
 	public ApplicationController(JobTimingsEntryService jobTimingsEntryService,
 			JSchSpringBatchLogsValidatingService logsValidatingService, JobLogsEntryService jobLogsEntryService,
-			FileClosureValidator fileClosureValidator, JFrameWindowUI jFrameWindowUI) {
+			FileClosureValidator fileClosureValidator, InputDataValidatorService inputDataValidatorService,
+			JframeInputUI jFrameWindowUI) {
 		this.jobTimingsEntryService = jobTimingsEntryService;
 		this.logsValidatingService = logsValidatingService;
 		this.jobLogsEntryService = jobLogsEntryService;
 		this.fileClosureValidator = fileClosureValidator;
+		this.inputDataValidatorService = inputDataValidatorService;
 		this.jFrameWindowUI = jFrameWindowUI;
 	}
 
@@ -81,27 +90,34 @@ public class ApplicationController {
 //		ArrayList<String> tempArrayList2 = tempArrayList1.get();
 //		System.out.println(tempArrayList2.toString());
 
-		for (String key : JOB_NAME_AND_LOG_NAME_MAP.keySet()) {
-			System.out.println(JOB_NAME_AND_LOG_NAME_MAP.get(key));
-		}
-
 		// Get the order date from the user, for which the details needs to be filled
 		Scanner scan = new Scanner(System.in);
-		System.out.println("Enter the Order Date that you need to enter timings for: ");
+		System.out.print("Enter the Order Date ");
+		fileClosureValidator.wait100ms();
+		System.err.println("(" + ORDER_DATE_FORMAT + "): ");
 		String gvnOrdrDate = scan.nextLine();
+		while (!inputDataValidatorService.isGvnDateValide(gvnOrdrDate, "OrderDate")) {
+			System.out.print("Given Date time is not valid. Enter a valid input ");
+			fileClosureValidator.wait100ms();
+			System.err.println("(" + ORDER_DATE_FORMAT + "): ");
+			gvnOrdrDate = scan.nextLine();
+		}
 
 		List<ChecklistTemplateData> jobChecklistDataList = ChecklistTemplateReader.readSheet(templateSheet);
 		List<JobDetailsData> jobDetailsData = JobDetailsReader.readSheet(jobDetailsSheet);
 		jobTimingsEntryService.fillJobTimingsAndStatus(jobChecklistDataList, jobDetailsData, gvnOrdrDate);
 
-		System.out.println("Enter the shift: ");
+		System.out.print("Enter the shift ");
+		fileClosureValidator.wait100ms();
+		System.err.println("(S1/S2/S3):");
 		String shift = scan.nextLine();
 		while (!(shift.equalsIgnoreCase("s1") || shift.equalsIgnoreCase("s2") || shift.equalsIgnoreCase("s3"))) {
 			System.err.println("Enter correct value: ");
 			shift = scan.nextLine();
 		}
-
-		System.out.println("Do you want to check logs for custom timings(y/n):");
+		System.out.print("Do you want to check logs for custom timings? ");
+		fileClosureValidator.wait100ms();
+		System.err.println("(y/n):");
 		String response = scan.nextLine();
 		while (!(response.equalsIgnoreCase("y") || response.equalsIgnoreCase("n"))) {
 			System.err.println("Enter correct value: ");
@@ -110,12 +126,61 @@ public class ApplicationController {
 		Map<String, ArrayList<String>> listOfErrorsOfLogs = new HashMap<>();
 
 		if (response.equalsIgnoreCase("y")) {
-			System.out.println("Enter Shift start time in EST(MM/dd/yy HH:mm):");
-			String shiftStartTime = scan.nextLine();
-			System.out.println(shiftStartTime);
-			System.out.println("Enter Shift end time in EST(MM/dd/yy HH:mm):");
-			String shiftEndTime = scan.nextLine();
-			System.out.println(shiftEndTime);
+			System.out.print("In which timezone you want to provide the Time? ");
+			fileClosureValidator.wait100ms();
+			System.err.println("(IST/EST):");
+			String response1 = scan.nextLine();
+			while (!(response1.equalsIgnoreCase("ist") || response1.equalsIgnoreCase("est"))) {
+				System.err.println("Enter correct value: ");
+				response = scan.nextLine();
+			}
+			String shiftStartTime = null, shiftEndTime = null;
+			if (response1.equalsIgnoreCase("ist")) {
+				System.out.print("Enter Shift Start Time in 24-Hour format Indian Time ");
+				fileClosureValidator.wait100ms();
+				System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+				shiftStartTime = scan.nextLine();
+				while (!inputDataValidatorService.isGvnDateValide(shiftStartTime, "ShiftTime")) {
+					System.out.print("Given Date time is not valid. Enter a valid input:");
+					fileClosureValidator.wait100ms();
+					System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+					shiftStartTime = scan.nextLine();
+				}
+				shiftStartTime = inputDataValidatorService.convertISTtoEST(shiftStartTime);
+				System.out.print("Enter Shift End Time in 24-Hour format Indian Time ");
+				fileClosureValidator.wait100ms();
+				System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+				shiftEndTime = scan.nextLine();
+				while (!inputDataValidatorService.isGvnDateValide(shiftEndTime, "ShiftTime")) {
+					System.out.print("Given Date time is not valid. Enter a valid input:");
+					fileClosureValidator.wait100ms();
+					System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+					shiftEndTime = scan.nextLine();
+				}
+				shiftEndTime = inputDataValidatorService.convertISTtoEST(shiftEndTime);
+			} else {
+				System.out.print("Enter Shift Start Time in 24-Hour format EST ");
+				fileClosureValidator.wait100ms();
+				System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+				shiftStartTime = scan.nextLine();
+				while (!inputDataValidatorService.isGvnDateValide(shiftStartTime, "ShiftTime")) {
+					System.out.print("Given Date time is not valid. Enter a valid input:");
+					fileClosureValidator.wait100ms();
+					System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+					shiftEndTime = scan.nextLine();
+				}
+				System.out.print("Enter Shift End Time in 24-Hour format EST ");
+				fileClosureValidator.wait100ms();
+				System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+				shiftEndTime = scan.nextLine();
+				while (!inputDataValidatorService.isGvnDateValide(shiftEndTime, "ShiftTime")) {
+					System.out.print("Given Date time is not valid. Enter a valid input:");
+					fileClosureValidator.wait100ms();
+					System.err.println("(" + SHIFT_TIME_FORMAT + "):");
+					shiftEndTime = scan.nextLine();
+				}
+			}
+			logger.info("Validating the shift from {} to {}", shiftStartTime, shiftEndTime);
 			listOfErrorsOfLogs = validateLogsForGvnTime(shift, shiftStartTime, shiftEndTime, listOfErrorsOfLogs);
 		} else {
 			listOfErrorsOfLogs = validateLogsRealTime(shift, listOfErrorsOfLogs);
@@ -139,8 +204,6 @@ public class ApplicationController {
 
 	public Map<String, ArrayList<String>> validateLogsRealTime(String shift,
 			Map<String, ArrayList<String>> listOfErrorsOfLogs) throws InterruptedException, ExecutionException {
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
 		CompletableFuture<Map<String, ArrayList<String>>> completableFutureList1 = logsValidatingService
 				.validateLogsInServer(shift, BATCH_SERVERS_LIST[0]);
 		CompletableFuture<Map<String, ArrayList<String>>> completableFutureList2 = logsValidatingService
@@ -154,8 +217,6 @@ public class ApplicationController {
 		listOfErrorsOfLogs.putAll(listOfErrorsInLogs1);
 		listOfErrorsOfLogs.putAll(listOfErrorsInLogs2);
 		listOfErrorsOfLogs.putAll(listOfErrorsInLogs3);
-		stopWatch.stop();
-		System.err.println(stopWatch.getTotalTimeSeconds());
 		return listOfErrorsOfLogs;
 	}
 

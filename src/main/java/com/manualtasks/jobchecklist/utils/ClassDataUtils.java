@@ -12,6 +12,10 @@ public class ClassDataUtils {
 		super();
 	}
 
+	public static final String ORDER_DATE_FORMAT = "MM/dd/yyyy";
+
+	public static final String SHIFT_TIME_FORMAT = "MM/dd/yy HH:mm";
+
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
 
 	public static final int TOTAL_COL_IN_CHECKLIST_SHEET = 21;
@@ -38,7 +42,7 @@ public class ClassDataUtils {
 
 	public static final int LOG_NAME_START_INDEX2 = 56;
 
-	public static final String[] BATCH_SERVERS_LIST = { "dctwv002", "dctwv003", "dctwv004" };
+	public static final String[] BATCH_SERVERS_LIST = { "dc04plvbuc300", "dc04plvbuc301" };// , "va10puvbas002" };
 
 	@SuppressWarnings("serial")
 	public static final Map<String, String> JOB_NAME_AND_LOG_NAME_MAP = new HashMap<String, String>() {
@@ -125,6 +129,7 @@ public class ClassDataUtils {
 			put("MonthlyGeorgiaCertifiedAgentJob", "ASCS_MONTHLY_GEORGIA_CERTIFIED_AGENT_REPORT_PROD");
 			put("AmericanInsuranceSubAgentJob", "ASCS_AMERICAN_INSURANCE_SUBAGENT_REPORT_PROD");
 			put("NAHU_Reporting_Job", "");
+			put("RTS_Report_Generic_Job", "ASCS_SBO_RTS_FL_AGENTS_REPORT_PROD");
 		}
 	};
 

@@ -47,12 +47,6 @@ public class JSchSpringBatchLogsValidatingService {
 
 	private TimeZone easternTimeZone = TimeZone.getTimeZone("America/New_York");
 
-	private SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-	private SimpleDateFormat dateFormatter4 = new SimpleDateFormat("MM/dd/yy HH:mm");
-
-	private SimpleDateFormat dateFormatter5 = new SimpleDateFormat("yyyy-MM-dd");
-
 	private static Logger logger = LoggerFactory.getLogger(JSchSpringBatchLogsValidatingService.class);
 
 	@Async("asyncTaskExecutor")
@@ -75,6 +69,10 @@ public class JSchSpringBatchLogsValidatingService {
 			if (batchServer.contains("dc04")) {
 				logNameStartIndexNum = LOG_NAME_START_INDEX1;
 				for (String logPath : ASCSSBO_LOGS_LOCATIONS_300_301) {
+//					if (logPath.equals("/apps/sclc/logs/") || logPath.equals("/apps/sclc/logs/ace/")) {
+//						listOfDatesForLogsCheck = logsReaderService.findLogOccuringDatesByShift2(shiftStartTime,
+//								shiftEndTime);
+//					}
 					try {
 						logsReaderService.readLogFilesForErrors(sftpChannel, logPath, listOfDatesForLogsCheck,
 								listOfErrorsOfLogs, errorLogFile, logNameStartIndexNum, shiftStartTime, shiftEndTime);
@@ -139,12 +137,15 @@ public class JSchSpringBatchLogsValidatingService {
 			FileWriter errorLogFile = new FileWriter(errorValidationLogPath + batchServer.toUpperCase() + ".txt");
 			ChannelSftp sftpChannel = applicationContext.getBean(ChannelSftp.class, batchServer, username, password);
 
+			SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			dateFormatter2.setTimeZone(easternTimeZone);
 
+			SimpleDateFormat dateFormatter4 = new SimpleDateFormat(SHIFT_TIME_FORMAT);
 			dateFormatter4.setTimeZone(easternTimeZone);
 
 			final String formattedShiftStartTime = dateFormatter2.format(dateFormatter4.parse(shiftStartTime));
 			final String formattedShiftEndTime = dateFormatter2.format(dateFormatter4.parse(shiftEndTime));
+//			logger.info("Formatted shift timings is from {} to {}", formattedShiftStartTime, formattedShiftEndTime);
 
 			ArrayList<String> listOfDatesForLogsCheck = logsReaderService.findLogOccuringDatesByShift(shift,
 					formattedShiftStartTime, formattedShiftEndTime);
@@ -156,6 +157,10 @@ public class JSchSpringBatchLogsValidatingService {
 				logNameStartIndexNum = LOG_NAME_START_INDEX1;
 
 				for (String logPath : ASCSSBO_LOGS_LOCATIONS_300_301) {
+//					if (logPath.equals("/apps/sclc/logs/") || logPath.equals("/apps/sclc/logs/ace/")) {
+//						listOfDatesForLogsCheck = logsReaderService.findLogOccuringDatesByShift2(shiftStartTime,
+//								shiftEndTime);
+//					}
 					try {
 						logsReaderService.readLogFilesForErrors(sftpChannel, logPath, listOfDatesForLogsCheck,
 								listOfErrorsOfLogs, errorLogFile, logNameStartIndexNum, formattedShiftStartTime,
@@ -213,6 +218,7 @@ public class JSchSpringBatchLogsValidatingService {
 		List<String> shiftTimings = new ArrayList<>();
 		String shiftStartTime = "", shiftEndTime = "";
 
+		SimpleDateFormat dateFormatter5 = new SimpleDateFormat("yyyy-MM-dd");
 		dateFormatter5.setTimeZone(easternTimeZone);
 
 		Calendar calendar = new GregorianCalendar();
@@ -220,17 +226,17 @@ public class JSchSpringBatchLogsValidatingService {
 
 		switch (shift) {
 		case "S1":
-			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 05:40";
-			calendar.add(Calendar.DATE, -1);
-			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 20:20";
+			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 06:15";
+			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 15:15";
 			break;
 		case "S2":
-			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 04:20";
-			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 13:40";
+			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 13:45";
+			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 23:15";
 			break;
 		case "S3":
-			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 11:50";
-			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 21:10";
+			shiftEndTime = dateFormatter5.format(calendar.getTime()) + " 06:45";
+			calendar.add(Calendar.DATE, -1);
+			shiftStartTime = dateFormatter5.format(calendar.getTime()) + " 20:45";
 			break;
 		default:
 			break;

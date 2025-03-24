@@ -1,4 +1,4 @@
-package com.manualtasks.jobchecklist.model;
+package com.manualtasks.jobchecklist.ui;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;

@@ -4,7 +4,11 @@ import static com.manualtasks.jobchecklist.utils.ClassDataUtils.*;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -57,11 +61,26 @@ public class ExcelDesign {
 		headerCellStyle.setFont(font);
 		headerCellStyle.setWrapText(true);
 
+		for (Row row : sheet)
+			highlightFonts(row.getCell(15));
+
 		setRowsStyle(sheet.getRow(0), headerCellStyle);
 
 		sheet.createFreezePane(0, 1);
-		sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, TOTAL_COL_IN_CHECKLIST_SHEET - 1));
+		sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, TOTAL_COL_IN_CHECKLIST_SHEET - 2));
 
+	}
+
+	private static void highlightFonts(Cell cell) {
+		CreationHelper creationHelper = cell.getSheet().getWorkbook().getCreationHelper();
+		Font highlightFont = cell.getSheet().getWorkbook().createFont();
+		highlightFont.setColor(IndexedColors.RED.getIndex());
+		String cellContent = cell.getStringCellValue();
+		RichTextString richTextString = creationHelper.createRichTextString(cellContent);
+		if (cellContent.length() >= 1 && !cellContent.equals("Error Details")) {
+			richTextString.applyFont(0, 2, highlightFont);
+		}
+		cell.setCellValue(richTextString);
 	}
 
 	private static void setRowsStyle(Row row, XSSFCellStyle rowCellStyle) {
@@ -88,6 +107,7 @@ public class ExcelDesign {
 		sheet.setColumnWidth(16, (40 * 256) + 200);
 		sheet.setColumnWidth(17, (40 * 256) + 200);
 		sheet.setColumnWidth(18, (40 * 256) + 200);
+		sheet.setColumnWidth(19, (19 * 256) + 200);
 	}
 
 }

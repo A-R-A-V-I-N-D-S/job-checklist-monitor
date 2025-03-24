@@ -40,6 +40,8 @@ public class ChecklistTemplateData {
 
 	private String remarks;
 
+	private String processingDate;
+
 	private boolean isJobDetailsFilled;
 
 	public ChecklistTemplateData() {
@@ -50,7 +52,7 @@ public class ChecklistTemplateData {
 			String businessReportName, String isReportGenerated, String ctmServer, String schedule, String frequency,
 			String shift, String jobDependency, String startTime, String endTime, String jobStatus,
 			String isLogsValidated, String errorDetails, String resolution, String application, String remarks,
-			boolean isJobDetailsFilled) {
+			String processingDate, boolean isJobDetailsFilled) {
 		super();
 		this.serialNo = serialNo;
 		this.type = type;
@@ -72,6 +74,7 @@ public class ChecklistTemplateData {
 		this.application = application;
 		this.remarks = remarks;
 		this.isJobDetailsFilled = isJobDetailsFilled;
+		this.processingDate = processingDate;
 	}
 
 	public String getSerialNo() {
@@ -234,6 +237,14 @@ public class ChecklistTemplateData {
 		this.isJobDetailsFilled = isJobDetailsFilled;
 	}
 
+	public String getProcessingDate() {
+		return processingDate;
+	}
+
+	public void setProcessingDate(String processingDate) {
+		this.processingDate = processingDate;
+	}
+
 	@Override
 	public String toString() {
 		return "ChecklistTemplateData [serialNo=" + serialNo + ", type=" + type + ", jobName=" + jobName
@@ -242,7 +253,7 @@ public class ChecklistTemplateData {
 				+ ", shift=" + shift + ", jobDependency=" + jobDependency + ", startTime=" + startTime + ", endTime="
 				+ endTime + ", jobStatus=" + jobStatus + ", isLogsValidated=" + isLogsValidated + ", errorDetails="
 				+ errorDetails + ", resolution=" + resolution + ", application=" + application + ", remarks=" + remarks
-				+ ", isJobDetailsFilled=" + isJobDetailsFilled + "]";
+				+ ", isJobDetailsFilled=" + isJobDetailsFilled + "processingDate" + processingDate + "]";
 	}
 
 }

@@ -52,11 +52,6 @@ public class ChecklistTemplateReader {
 				break;
 			case 3:
 				checklistTemplateData.setFolderName(formatter.formatCellValue(row.getCell(i)));
-//				if (checklistTemplateData.getJobName().equals("COPELAND_GROUP_USA_LLC_SUBAGENT_REPORT_PROD")) {
-//					String str1 = str.replaceAll("^\\[\\u00A0]+|\\s+$", "");
-//					for (int j = 0; j < str1.length(); j++)
-//						System.out.println("Char at: " + j + " - " + str1.codePointAt(j));
-//				}
 				break;
 			case 4:
 				checklistTemplateData.setBusinessReportName(formatter.formatCellValue(row.getCell(i)));
@@ -110,6 +105,9 @@ public class ChecklistTemplateReader {
 				break;
 			case 18:
 				checklistTemplateData.setRemarks(formatter.formatCellValue(row.getCell(i)));
+				break;
+			case 19:
+				checklistTemplateData.setProcessingDate(formatter.formatCellValue(row.getCell(i)));
 				break;
 			default:
 				break;

@@ -52,17 +52,11 @@ public class JobTimingsEntryService {
 							jobTemplateData.setStartTime(jobDetailsData.getStartTime());
 							jobTemplateData.setEndTime(jobDetailsData.getEndTime());
 
+//							System.out.println(jobDetailsData.toString());
 							// Condition for filling job status
 							if (jobDetailsData.getJobStatus().equals("Ended OK")) {
 								jobTemplateData.setJobStatus(STATUS_ENDED_OK);
 							} else if (jobDetailsData.getJobStatus().equals(STATUS_EXECUTING)) {
-								jobTemplateData.setJobStatus(STATUS_EXECUTING);
-							} else if (jobDetailsData.getJobStatus().equals("Wait Condition")
-									&& jobDetailsData.getStartTime().equals("")
-									&& jobDetailsData.getStartTime().equals("")) {
-								jobTemplateData.setJobStatus(STATUS_YET_TO_START);
-							} else if (jobDetailsData.getJobStatus().equals("Wait Condition")
-									&& !jobDetailsData.getStartTime().equals("")) {
 								jobTemplateData.setJobStatus(STATUS_EXECUTING);
 							} else if (jobDetailsData.getStartTime().equals("")
 									&& jobDetailsData.getStartTime().equals("")
@@ -72,6 +66,13 @@ public class JobTimingsEntryService {
 									&& jobDetailsData.getStartTime().equals("")
 									&& jobDetailsData.getIsJobHeld().equals("Checked")) {
 								jobTemplateData.setJobStatus(STATUS_HELD);
+							} else if (jobDetailsData.getJobStatus().equals("Wait Condition")
+									&& jobDetailsData.getStartTime().equals("")
+									&& jobDetailsData.getStartTime().equals("")) {
+								jobTemplateData.setJobStatus(STATUS_YET_TO_START);
+							} else if (jobDetailsData.getJobStatus().equals("Wait Condition")
+									&& !jobDetailsData.getStartTime().equals("")) {
+								jobTemplateData.setJobStatus(STATUS_EXECUTING);
 							}
 
 							// To avoid duplicate timings entry
