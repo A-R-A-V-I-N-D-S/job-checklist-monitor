@@ -42,7 +42,7 @@ public class ClassDataUtils {
 
 	public static final int LOG_NAME_START_INDEX2 = 56;
 
-	public static final String[] BATCH_SERVERS_LIST = { "dc04plvbuc300", "dc04plvbuc301" };// , "va10puvbas002" };
+	public static final String[] BATCH_SERVERS_LIST = { "dc04plvbuc300", "dc04plvbuc301", "va10puvbas002" };
 
 	@SuppressWarnings("serial")
 	public static final Map<String, String> JOB_NAME_AND_LOG_NAME_MAP = new HashMap<String, String>() {
@@ -105,7 +105,7 @@ public class ClassDataUtils {
 			put("Cmplnt_Mntr_Watchlist_Job", "ASCS_SBO_HOURLY_CMPLT_MNTR_WATCHLIST_DATA_LOAD");
 			put("BOD_Mailingservice_Job", "ASCS_SBO_HOURLY_MAILINGSERVICE");
 			put("LicenseAppointmentReportJob", "ASCS_SBO_DAILY_LCNS_STATE_APPT_TERM_LOAD");
-			put("RTS_Report_Generic_Job", "XXXXXXXXXXXXXXXXXXX");
+			put("RTS_Report_Generic_Job", "");
 			put("GenerateRTSReports", "ASCS_SBO_DAILY_GENERATE_RTS_REPORTS");
 			put("RTSUniverse", "ASCS_SBO_DAILY_RTS_REPORTS");
 			put("RTSCertificationInProgressJob", "ASCS_SBO_DAILY_RTS_CERT_INPROGRESS");
@@ -130,6 +130,7 @@ public class ClassDataUtils {
 			put("AmericanInsuranceSubAgentJob", "ASCS_AMERICAN_INSURANCE_SUBAGENT_REPORT_PROD");
 			put("NAHU_Reporting_Job", "");
 			put("RTS_Report_Generic_Job", "ASCS_SBO_RTS_FL_AGENTS_REPORT_PROD");
+			put("ACCESS_HEALTH_LIFE_SUBAGENT_REPORT_JOB", "");
 		}
 	};
 

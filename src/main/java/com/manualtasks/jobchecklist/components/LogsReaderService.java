@@ -172,40 +172,42 @@ public class LogsReaderService {
 						listOfErrorsOfLogs.put(jobName, errorList);
 
 						while ((line = br.readLine()) != null) {
+							// condition to limit total characters to 300 per line of error for CP Letter
+							// job
+							if (jobName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
+								maxLen = 196;
+							else if (line.length() > 300)
+								maxLen = 300;
+							else
+								maxLen = line.length();
 							if (line.contains("ERROR")) {
-								// condition to limit total characters to 300 per line of error for CP Letter
-								// job
-								if (jobName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
-									maxLen = 196;
-								else if (line.length() > 300)
-									maxLen = 300;
-								else
-									maxLen = line.length();
-								if (line.contains("ERROR")) {
-									errorLine = line.substring(line.indexOf("ERROR"), maxLen);
-								} else if (line.contains("Exception") || line.contains("exception")
-										|| line.contains("Error") || line.contains("error")) {
-									errorLine = line.substring(maxLen);
-								}
-//								errorLine = line.substring(0, maxLen);
+								errorLine = line.substring(line.indexOf("ERROR"), maxLen);
 								errorTimestamp = line.substring(0, 19);
+//								errorLine = line.substring(0, maxLen);
 								if (!errorList.contains(errorLine)) {
 									errorList.add(errorLine);
-									if (errorLine.contains("ERROR"))
-										addTimeStamp(errorList, errorLine, errorTimestamp);
-									logger.info(errorLine);
+//									if (errorLine.contains("ERROR"))
+//										addTimeStamp(errorList, errorLine, errorTimestamp);
+//									logger.info(errorLine);
 									listOfErrorsOfLogs.put(jobName, errorList);
 								}
 								errorLogFile.write(errorLine + "\n");
 								isErrExist = true;
-							}
-							if (line.contains("deadlock")) {
+							} else if (line.contains("Exception") || line.contains("exception")
+									|| line.contains("Error") || line.contains("error")) {
+								errorLine = line.substring(0, maxLen);
+								if (!errorList.contains(errorLine)) {
+									errorList.add(errorLine);
+//									logger.info(errorLine);
+									listOfErrorsOfLogs.put(jobName, errorList);
+								}
+								errorLogFile.write(errorLine + "\n");
+								isErrExist = true;
+							} else if (line.contains("deadlock")) {
 								errorLine = "Job has been failed with deadlock\n";
 								if (!errorList.contains(errorLine)) {
 									errorList.add(errorLine);
-									if (errorLine.contains("ERROR"))
-										addTimeStamp(errorList, errorLine, errorTimestamp);
-									logger.info(errorLine);
+//									logger.info(errorLine);
 									listOfErrorsOfLogs.put(jobName, errorList);
 								}
 								errorLogFile.write(errorLine + "\n");
@@ -223,19 +225,14 @@ public class LogsReaderService {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void addTimeStamp(ArrayList<String> errorList, String errorLine, String errorTimestamp) {
-		logger.info("Came inside the timestamp method");
-//		for (String line : errorList) {
 		for (int i = 0; i < errorList.size(); i++) {
-			if (errorList.get(i).contains(errorLine)) {
+			if (errorList.get(i).contains(errorLine) && errorList.get(i).contains("ERROR")) {
 				if (errorList.get(i).contains("[[") && errorList.get(i).contains("]]")) {
-					logger.info("Already has brackets");
 					errorList.set(i, errorList.get(i).replace("]]", ", " + errorTimestamp + "]]"));
-//					line.replace("]]", ", " + errorTimestamp + "]]");
 				} else {
-					logger.info("Adding new brackets");
-					errorList.set(i, errorList.get(i).concat("[[" + errorTimestamp + "]]"));
-//					line.concat("[[" + errorTimestamp + "]]");
+					errorList.set(i, errorList.get(i).concat(" [[" + errorTimestamp + "]]"));
 				}
 			}
 		}

@@ -78,7 +78,8 @@ public class ExcelDesign {
 		String cellContent = cell.getStringCellValue();
 		RichTextString richTextString = creationHelper.createRichTextString(cellContent);
 		if (cellContent.length() >= 1 && !cellContent.equals("Error Details")) {
-			richTextString.applyFont(0, 2, highlightFont);
+			richTextString.applyFont(cellContent.indexOf("Job has been failed with deadlock"),
+					cellContent.indexOf("Job has been failed with deadlock") + 33, highlightFont);
 		}
 		cell.setCellValue(richTextString);
 	}
