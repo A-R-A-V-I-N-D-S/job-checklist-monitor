@@ -4,6 +4,7 @@ import static com.manualtasks.jobchecklist.utils.ClassDataUtils.STATUS_YET_TO_ST
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.STATUS_NA;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +16,15 @@ import com.manualtasks.jobchecklist.model.ChecklistTemplateData;
 @Component
 public class JobLogsEntryService {
 
-	public void fillJobErrorsAndValidationStatus(Map<String, ArrayList<String>> jobsAndErrorsPair,
+	public Map<String, String> fillJobErrorsAndValidationStatus(Map<String, ArrayList<String>> jobsAndErrorsPair,
 			List<ChecklistTemplateData> jobChecklistDataList, String shift) {
+
+		Map<String, String> untrackedJobsAndErrors = new HashMap<>();
+		ArrayList<String> allTrackedJobNames = new ArrayList<>();
+
 		for (int i = 0; i < jobChecklistDataList.size(); i++) {
 			String jobName = jobChecklistDataList.get(i).getJobName();
+			allTrackedJobNames.add(jobName);
 			if (jobsAndErrorsPair.containsKey(jobName)
 					&& !(jobChecklistDataList.get(i).getJobStatus().equalsIgnoreCase(STATUS_YET_TO_START))
 					&& !(jobChecklistDataList.get(i).getJobStatus().equalsIgnoreCase(STATUS_NA))) {
@@ -38,6 +44,13 @@ public class JobLogsEntryService {
 				}
 			}
 		}
+		for (Map.Entry<String, ArrayList<String>> entry : jobsAndErrorsPair.entrySet()) {
+			if (!allTrackedJobNames.contains(entry.getKey())) {
+				untrackedJobsAndErrors.put(entry.getKey(),
+						StringUtils.collectionToDelimitedString(entry.getValue(), "\n"));
+				System.out.println(entry.getKey());
+			}
+		}
+		return untrackedJobsAndErrors;
 	}
-
 }

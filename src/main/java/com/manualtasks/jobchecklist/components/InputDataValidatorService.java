@@ -71,10 +71,10 @@ public class InputDataValidatorService {
 				|| dateFormatter2.parse(gvnLogCrtdTime1).equals(dateFormatter2.parse(shiftStartTime)))
 				&& (dateFormatter2.parse(gvnLogCrtdTime1).before(dateFormatter2.parse(shiftEndTime))
 						|| dateFormatter2.parse(gvnLogCrtdTime1).equals(dateFormatter2.parse(shiftEndTime)))) {
-//			System.out.println("Considering TRUE");
+			System.out.println("Considering TRUE");
 			return true;
 		} else {
-//			System.out.println("Considering FALSE");
+			System.out.println("Considering FALSE");
 			return false;
 		}
 	}
@@ -109,7 +109,7 @@ public class InputDataValidatorService {
 
 	public String convertISTtoEST(String indianTime) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(SHIFT_TIME_FORMAT);
-		isGvnDateValide(indianTime, "ShiftTime");
+		isGvnDateValid(indianTime, "ShiftTime");
 		LocalDateTime localDateTime = LocalDateTime.parse(indianTime, formatter);
 		ZonedDateTime indianDateTime = localDateTime.atZone(ZoneId.of("Asia/Kolkata"));
 		ZonedDateTime easternDateTime = indianDateTime.withZoneSameInstant(ZoneId.of("America/New_York"));
@@ -117,7 +117,7 @@ public class InputDataValidatorService {
 		return easternDateTime.format(formatter).toString();
 	}
 
-	public boolean isGvnDateValide(String dateTime, String dateType) throws DateTimeException {
+	public boolean isGvnDateValid(String dateTime, String dateType) throws DateTimeException {
 		SimpleDateFormat orderDateFormat = new SimpleDateFormat(ORDER_DATE_FORMAT);
 		orderDateFormat.setLenient(false);
 		SimpleDateFormat shiftDateTimeFormat = new SimpleDateFormat(SHIFT_TIME_FORMAT);

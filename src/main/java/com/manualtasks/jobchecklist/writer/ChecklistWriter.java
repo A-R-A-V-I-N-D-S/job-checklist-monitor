@@ -2,7 +2,10 @@ package com.manualtasks.jobchecklist.writer;
 
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -109,6 +112,27 @@ public class ChecklistWriter {
 		}
 
 		logger.info("Job checklist writer - END");
+
+	}
+
+	public static void writeUntrackedJobErrors(XSSFSheet untrackedJobsSheet,
+			Map<String, String> untrackedJobsAndErrors) {
+
+		logger.info("Untracked Job writer - START");
+
+		int i = 0;
+		XSSFRow row = untrackedJobsSheet.createRow(i);
+		row.createCell(0).setCellValue("Log Name");
+		row.createCell(1).setCellValue("Error Details");
+
+		for (Map.Entry<String, String> entry : untrackedJobsAndErrors.entrySet()) {
+			++i;
+			row = untrackedJobsSheet.createRow(i);
+			row.createCell(0).setCellValue(entry.getKey());
+			row.createCell(1).setCellValue(entry.getValue());
+		}
+
+		logger.info("Untracked Job writer - END");
 
 	}
 

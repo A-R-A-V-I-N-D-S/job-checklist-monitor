@@ -10,48 +10,109 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExcelDesign {
 
+	private static Logger logger = LoggerFactory.getLogger(ExcelDesign.class);
+
 	public static void setChecklistExcelDesign(XSSFWorkbook outputWorkbook) {
+
+		logger.info("Excel designer - START");
+
 		XSSFSheet sheet = outputWorkbook.getSheet(CHECKLIST_SHEET_NAME);
+		setDefaultChecklistStyle(sheet);
 
-		adjustColumnWidth(sheet);
+		if (outputWorkbook.getNumberOfSheets() > 1) {
+			XSSFSheet untrackedJobSheet = outputWorkbook.getSheet(UNTRACKED_JOB_SHEET_NAME);
+			setUntrackedJobSheetStyle(untrackedJobSheet);
+		}
 
+		logger.info("Excel designer - END");
+
+	}
+
+	private static void setUntrackedJobSheetStyle(XSSFSheet untrackedJobSheet) {
 		// All rows Style
-		XSSFCellStyle rowCellStyle = outputWorkbook.createCellStyle();
+		XSSFCellStyle rowCellStyle = untrackedJobSheet.getWorkbook().createCellStyle();
 		rowCellStyle.setBorderLeft(BorderStyle.THIN);
 		rowCellStyle.setBorderRight(BorderStyle.THIN);
 		rowCellStyle.setBorderTop(BorderStyle.THIN);
 		rowCellStyle.setBorderBottom(BorderStyle.THIN);
-
-		for (Row row : sheet)
+		for (Row row : untrackedJobSheet)
 			setRowsStyle(row, rowCellStyle);
 
 		// Setting wrap text for some cells
-		XSSFCellStyle wrapCellStyle = outputWorkbook.createCellStyle();
+		XSSFCellStyle wrapCellStyle = untrackedJobSheet.getWorkbook().createCellStyle();
 		wrapCellStyle.setBorderLeft(BorderStyle.THIN);
 		wrapCellStyle.setBorderRight(BorderStyle.THIN);
 		wrapCellStyle.setBorderTop(BorderStyle.THIN);
 		wrapCellStyle.setBorderBottom(BorderStyle.THIN);
 		wrapCellStyle.setWrapText(true);
+		for (Row row : untrackedJobSheet) {
+			row.getCell(1).setCellStyle(wrapCellStyle);
+		}
 
+		// Header row color and font
+		XSSFFont font = untrackedJobSheet.getWorkbook().createFont();
+		font.setBold(true);
+
+		XSSFCellStyle headerCellStyle = untrackedJobSheet.getWorkbook().createCellStyle();
+		headerCellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(180, 198, 231)));
+		headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		headerCellStyle.setBorderLeft(BorderStyle.THIN);
+		headerCellStyle.setBorderRight(BorderStyle.THIN);
+		headerCellStyle.setBorderTop(BorderStyle.THIN);
+		headerCellStyle.setBorderBottom(BorderStyle.THIN);
+		wrapCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+		headerCellStyle.setFont(font);
+		headerCellStyle.setWrapText(true);
+		setRowsStyle(untrackedJobSheet.getRow(0), headerCellStyle);
+
+		untrackedJobSheet.setColumnWidth(0, (35 * 256) + 200);
+		untrackedJobSheet.setColumnWidth(1, (70 * 256) + 200);
+
+		// Set tab color
+		untrackedJobSheet.setTabColor(IndexedColors.RED.getIndex());
+	}
+
+	private static void setDefaultChecklistStyle(XSSFSheet sheet) {
+		adjustColumnWidth(sheet);
+
+		// All rows Style
+		XSSFCellStyle rowCellStyle = sheet.getWorkbook().createCellStyle();
+		rowCellStyle.setBorderLeft(BorderStyle.THIN);
+		rowCellStyle.setBorderRight(BorderStyle.THIN);
+		rowCellStyle.setBorderTop(BorderStyle.THIN);
+		rowCellStyle.setBorderBottom(BorderStyle.THIN);
+		for (Row row : sheet)
+			setRowsStyle(row, rowCellStyle);
+
+		// Setting wrap text for some cells
+		XSSFCellStyle wrapCellStyle = sheet.getWorkbook().createCellStyle();
+		wrapCellStyle.setBorderLeft(BorderStyle.THIN);
+		wrapCellStyle.setBorderRight(BorderStyle.THIN);
+		wrapCellStyle.setBorderTop(BorderStyle.THIN);
+		wrapCellStyle.setBorderBottom(BorderStyle.THIN);
+		wrapCellStyle.setWrapText(true);
 		for (Row row : sheet) {
 			row.getCell(10).setCellStyle(wrapCellStyle);
 			row.getCell(15).setCellStyle(wrapCellStyle);
 		}
 
 		// Header row color and font
-		XSSFFont font = outputWorkbook.createFont();
+		XSSFFont font = sheet.getWorkbook().createFont();
 		font.setBold(true);
 
-		XSSFCellStyle headerCellStyle = outputWorkbook.createCellStyle();
+		XSSFCellStyle headerCellStyle = sheet.getWorkbook().createCellStyle();
 		headerCellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(180, 198, 231)));
 		headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 		headerCellStyle.setBorderLeft(BorderStyle.THIN);
@@ -60,7 +121,6 @@ public class ExcelDesign {
 		headerCellStyle.setBorderBottom(BorderStyle.THIN);
 		headerCellStyle.setFont(font);
 		headerCellStyle.setWrapText(true);
-
 		for (Row row : sheet)
 			highlightFonts(row.getCell(15));
 
@@ -78,10 +138,9 @@ public class ExcelDesign {
 		String cellContent = cell.getStringCellValue();
 		RichTextString richTextString = creationHelper.createRichTextString(cellContent);
 		if (cellContent.length() >= 1 && !cellContent.equals("Error Details")) {
-			richTextString.applyFont(cellContent.indexOf("Job has been failed with deadlock"),
-					cellContent.indexOf("Job has been failed with deadlock") + 33, highlightFont);
+			richTextString.applyFont(0, 2, highlightFont);
 		}
-		cell.setCellValue(richTextString);
+//		cell.setCellValue(richTextString);
 	}
 
 	private static void setRowsStyle(Row row, XSSFCellStyle rowCellStyle) {

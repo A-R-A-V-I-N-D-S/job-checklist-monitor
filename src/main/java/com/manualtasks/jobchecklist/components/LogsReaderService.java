@@ -1,6 +1,6 @@
 package com.manualtasks.jobchecklist.components;
 
-import static com.manualtasks.jobchecklist.utils.ClassDataUtils.JOB_NAME_AND_LOG_NAME_MAP;
+import static com.manualtasks.jobchecklist.utils.ClassDataUtils.*;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -71,7 +72,7 @@ public class LogsReaderService {
 		return logDates;
 	}
 
-	public ArrayList<String> findLogOccuringDatesByShift(String shift, String shiftStartTime, String shiftEndTime)
+	public ArrayList<String> findLogOccuringDatesByTime(String shift, String shiftStartTime, String shiftEndTime)
 			throws ParseException {
 
 		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyyMMdd");
@@ -80,18 +81,34 @@ public class LogsReaderService {
 		SimpleDateFormat dateFormatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		dateFormatter2.setTimeZone(easternTimeZone);
 
+		SimpleDateFormat dateFormatter3 = new SimpleDateFormat("yyyy-MM-dd");
+		dateFormatter2.setTimeZone(easternTimeZone);
+
 		String timeStampTdy_1, timeStampYest_1;
+		String timeStampTdy_2, timeStampYest_2;
 
 //		System.out.println(shiftStartTime + " - " + shiftEndTime);
 
 		ArrayList<String> logDates = new ArrayList<>();
 		timeStampTdy_1 = dateFormatter1.format(dateFormatter2.parse(shiftEndTime));
+		timeStampTdy_2 = dateFormatter3.format(dateFormatter2.parse(shiftEndTime));
 		timeStampYest_1 = dateFormatter1.format(dateFormatter2.parse(shiftStartTime));
-		if (shift.equalsIgnoreCase("s1")) {
-			logDates.add(timeStampYest_1);
+		timeStampYest_2 = dateFormatter3.format(dateFormatter2.parse(shiftStartTime));
+		if (timeStampYest_1.equals(timeStampTdy_1)) {
 			logDates.add(timeStampTdy_1);
+			System.out.println("==>" + timeStampTdy_1);
 		} else {
 			logDates.add(timeStampTdy_1);
+			logDates.add(timeStampYest_1);
+			System.out.println("==>" + timeStampTdy_1 + ", " + timeStampYest_1);
+		}
+		if (timeStampYest_2.equals(timeStampTdy_2)) {
+			logDates.add(timeStampTdy_2);
+			System.out.println("==>" + timeStampTdy_2);
+		} else {
+			logDates.add(timeStampTdy_2);
+			logDates.add(timeStampYest_2);
+			System.out.println("==>" + timeStampTdy_2 + ", " + timeStampYest_2);
 		}
 		return logDates;
 
@@ -123,7 +140,8 @@ public class LogsReaderService {
 
 	public void readLogFilesForErrors(ChannelSftp sftpChannel, String logPath,
 			ArrayList<String> listOfDatesForLogsCheck, Map<String, ArrayList<String>> listOfErrorsOfLogs,
-			FileWriter errorLogFile, int logNameStartIndexNum, String shiftStartTime, String shiftEndTime)
+			FileWriter errorLogFile, int logNameStartIndexNum, String shiftStartTime, String shiftEndTime,
+			Map<String, String> JOB_NAME_AND_LOG_NAME_MAP)
 			throws SftpException, IOException, ParseException, JSchException {
 		sftpChannel.cd(logPath);
 		Vector<LsEntry> logsList = sftpChannel.ls(logPath);
@@ -144,6 +162,7 @@ public class LogsReaderService {
 					timeStamp = logNameWithTimeStamp.substring(
 							logNameWithTimeStamp.indexOf(listOfDatesForLogsCheck.get(x).toString()),
 							logNameWithTimeStamp.indexOf("."));
+					System.out.println(logNameWithTimeStamp + " - " + timeStamp);
 					logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
 							log.toString().substring(logNameStartIndexNum));
 					if (validatorService.isLogCretdInGivnShift(timeStamp, shiftStartTime, shiftEndTime,
@@ -151,9 +170,11 @@ public class LogsReaderService {
 						logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
 								log.toString().substring(logNameStartIndexNum));
 						logName = logNameWithTimeStamp.substring(0, logNameWithTimeStamp.indexOf(timeStamp));
-						if (logName.contains("_")) {
+						System.out.println(logName);
+						if (logName.charAt(logName.length() - 1) == '_') {
 							logName = logName.substring(0, logName.length() - 1);
 						}
+						System.out.println(logName);
 						stream = sftpChannel.get(logPath + logNameWithTimeStamp);
 
 						br = new BufferedReader(new InputStreamReader(stream));
@@ -165,6 +186,8 @@ public class LogsReaderService {
 						String jobName = "";
 						if (JOB_NAME_AND_LOG_NAME_MAP.containsKey(logName))
 							jobName = JOB_NAME_AND_LOG_NAME_MAP.get(logName);
+						else
+							jobName = logName;
 						if (listOfErrorsOfLogs.containsKey(jobName))
 							errorList = listOfErrorsOfLogs.get(jobName);
 						else
@@ -193,8 +216,7 @@ public class LogsReaderService {
 								}
 								errorLogFile.write(errorLine + "\n");
 								isErrExist = true;
-							} else if (line.contains("Exception") || line.contains("exception")
-									|| line.contains("Error") || line.contains("error")) {
+							} else if (ERROR_KEYWORDS_LIST.stream().anyMatch(line::contains)) {
 								errorLine = line.substring(0, maxLen);
 								if (!errorList.contains(errorLine)) {
 									errorList.add(errorLine);
