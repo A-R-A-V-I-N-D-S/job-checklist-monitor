@@ -170,11 +170,9 @@ public class LogsReaderService {
 						logger.info("{} --> {}/{}", sftpChannel.getSession().getHost(), sftpChannel.pwd(),
 								log.toString().substring(logNameStartIndexNum));
 						logName = logNameWithTimeStamp.substring(0, logNameWithTimeStamp.indexOf(timeStamp));
-						System.out.println(logName);
 						if (logName.charAt(logName.length() - 1) == '_') {
 							logName = logName.substring(0, logName.length() - 1);
 						}
-						System.out.println(logName);
 						stream = sftpChannel.get(logPath + logNameWithTimeStamp);
 
 						br = new BufferedReader(new InputStreamReader(stream));

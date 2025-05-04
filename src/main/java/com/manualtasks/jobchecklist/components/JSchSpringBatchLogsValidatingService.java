@@ -86,7 +86,7 @@ public class JSchSpringBatchLogsValidatingService {
 					} catch (Exception exc) {
 						if (exc.toString().contains("2: No such file")) {
 							logger.warn("{} --> {} is not applicable for logs", sftpChannel.getSession().getHost(),
-									logPath);
+									sftpChannel.pwd());
 							continue;
 						} else {
 							logger.error(exc.getMessage());

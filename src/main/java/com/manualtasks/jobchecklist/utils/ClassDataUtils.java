@@ -76,7 +76,7 @@ public class ClassDataUtils {
 			"/apps/sclc/batch/aceAgentReports/logs/", "/apps/sclc/batch/fileextract/logs/",
 			"/apps/sclc/batch/common_config/logs/", "/apps/sclc/batch/ProducerSboProcess/logs/",
 			"/apps/sclc/batch/cmdinbound/logs/", "/apps/sclc/batch/ProducerLetterProcess/logs/",
-			"/apps/sclc/batch/MassUpload/logs/", "/apps/sclc/logs"));
+			"/apps/sclc/batch/MassUpload/logs/", "/apps/sclc/logs/"));
 
 	public static final ArrayList<String> ASCSSBO_LOGS_LOCATIONS_002 = new ArrayList<String>(
 			Arrays.asList("/usr/app/blcs/data_process/logs/", "/usr/app/ascs/data_process/logs/"));

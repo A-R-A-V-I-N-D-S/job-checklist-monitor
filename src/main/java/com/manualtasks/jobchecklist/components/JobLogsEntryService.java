@@ -47,7 +47,8 @@ public class JobLogsEntryService {
 		for (Map.Entry<String, ArrayList<String>> entry : jobsAndErrorsPair.entrySet()) {
 			if (!allTrackedJobNames.contains(entry.getKey())) {
 				untrackedJobsAndErrors.put(entry.getKey(),
-						StringUtils.collectionToDelimitedString(entry.getValue(), "\n"));
+						shift.toUpperCase() + ":\n" + (entry.getValue().isEmpty() ? "No Errors"
+								: StringUtils.collectionToDelimitedString(entry.getValue(), "\n")));
 				System.out.println(entry.getKey());
 			}
 		}

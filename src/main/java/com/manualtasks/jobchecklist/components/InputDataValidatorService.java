@@ -56,7 +56,7 @@ public class InputDataValidatorService {
 				gvnLogCrtdTime1 = dateFormatter2.format(formatter.parse(logTimeStamp));
 				break;
 			} catch (ParseException | DateTimeException e) {
-				System.out.println("ParseException --> Going to next formatter");
+//				System.out.println("ParseException --> Going to next formatter");
 				continue;
 			}
 		}
@@ -71,10 +71,10 @@ public class InputDataValidatorService {
 				|| dateFormatter2.parse(gvnLogCrtdTime1).equals(dateFormatter2.parse(shiftStartTime)))
 				&& (dateFormatter2.parse(gvnLogCrtdTime1).before(dateFormatter2.parse(shiftEndTime))
 						|| dateFormatter2.parse(gvnLogCrtdTime1).equals(dateFormatter2.parse(shiftEndTime)))) {
-			System.out.println("Considering TRUE");
+//			System.out.println("Considering TRUE");
 			return true;
 		} else {
-			System.out.println("Considering FALSE");
+//			System.out.println("Considering FALSE");
 			return false;
 		}
 	}
