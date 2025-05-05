@@ -159,6 +159,7 @@ public class LogsReaderService {
 //							logNameWithTimeStamp.indexOf(shiftStartTime.substring(0, 4)),
 //							logNameWithTimeStamp.indexOf("."));
 //					--> Changing the time stamp calculation in the substring for further precision
+					System.out.println(logNameWithTimeStamp);
 					timeStamp = logNameWithTimeStamp.substring(
 							logNameWithTimeStamp.indexOf(listOfDatesForLogsCheck.get(x).toString()),
 							logNameWithTimeStamp.indexOf("."));
@@ -195,9 +196,13 @@ public class LogsReaderService {
 						while ((line = br.readLine()) != null) {
 							// condition to limit total characters to 300 per line of error for CP Letter
 							// job
-							if (jobName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
-								maxLen = 196;
-							else if (line.length() > 300)
+							if (jobName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD")) {
+								if (line.length() > 196) {
+									maxLen = 196;
+								} else {
+									maxLen = line.length();
+								}
+							} else if (line.length() > 300)
 								maxLen = 300;
 							else
 								maxLen = line.length();
