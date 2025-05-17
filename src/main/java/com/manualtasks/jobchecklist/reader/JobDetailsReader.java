@@ -25,8 +25,10 @@ public class JobDetailsReader {
 		List<JobDetailsData> jobDetailsList = new ArrayList<>();
 
 		// Transform the row data to the defined data type
-		for (Row row : jobDetailsSheet)
-			jobDetailsList.add(createModelFromRow(row));
+		for (Row row : jobDetailsSheet) {
+			if (!row.getCell(1).toString().isEmpty() && !row.getCell(2).toString().isEmpty())
+				jobDetailsList.add(createModelFromRow(row));
+		}
 
 		logger.info("CTM Job Details Report reader - END");
 		return jobDetailsList;

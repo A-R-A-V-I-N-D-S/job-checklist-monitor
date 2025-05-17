@@ -2,11 +2,8 @@ package com.manualtasks.jobchecklist.writer;
 
 import static com.manualtasks.jobchecklist.utils.ClassDataUtils.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.xssf.usermodel.XSSFCell;

@@ -30,6 +30,8 @@ public class ClassDataUtils {
 	public static final String UNTRACKED_JOB_SHEET_NAME = "Untracked Jobs";
 
 	public static final String STATUS_ENDED_OK = "Ended OK";
+	
+	public static final String STATUS_ENDED_NOT_OK = "Ended Not OK";
 
 	public static final String STATUS_EXECUTING = "Executing";
 

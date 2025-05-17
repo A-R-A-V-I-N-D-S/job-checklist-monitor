@@ -25,8 +25,10 @@ public class ChecklistTemplateReader {
 		List<ChecklistTemplateData> templateData = new ArrayList<>();
 
 		// Transform the row data to the defined data type
-		for (Row row : templateSheet)
-			templateData.add(createModelFromRow(row));
+		for (Row row : templateSheet) {
+			if (!row.getCell(1).toString().isEmpty() && !row.getCell(2).toString().isEmpty())
+				templateData.add(createModelFromRow(row));
+		}
 
 		logger.info("Job Checklist template reader - END");
 		return templateData;

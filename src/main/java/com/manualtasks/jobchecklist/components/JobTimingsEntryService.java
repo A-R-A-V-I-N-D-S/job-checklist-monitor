@@ -54,8 +54,10 @@ public class JobTimingsEntryService {
 
 //							System.out.println(jobDetailsData.toString());
 							// Condition for filling job status
-							if (jobDetailsData.getJobStatus().equals("Ended OK")) {
+							if (jobDetailsData.getJobStatus().equalsIgnoreCase("Ended OK")) {
 								jobTemplateData.setJobStatus(STATUS_ENDED_OK);
+							} else if (jobDetailsData.getJobStatus().equalsIgnoreCase(STATUS_ENDED_NOT_OK)) {
+								jobTemplateData.setJobStatus(STATUS_ENDED_NOT_OK);
 							} else if (jobDetailsData.getJobStatus().equals(STATUS_EXECUTING)) {
 								jobTemplateData.setJobStatus(STATUS_EXECUTING);
 							} else if (jobDetailsData.getStartTime().equals("")
